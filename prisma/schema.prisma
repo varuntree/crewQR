@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Worker {
+  id                String             @id @default(uuid())
+  phone_number      String             @unique
+  name              String?
+  isActive          Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  attendanceRecords AttendanceRecord[]
+}
+
+model Site {
+  id                String             @id @default(uuid())
+  name              String
+  location          String?
+  attendanceRecords AttendanceRecord[]
+}
+
+model SafetyInstruction {
+  id                String             @id @default(uuid())
+  instructionText   String
+  isActive          Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  attendanceRecords AttendanceRecordOnSafetyInstruction[]
+}
+
+model AttendanceRecord {
+  id                  String              @id @default(uuid())
+  worker              Worker              @relation(fields: [workerId], references: [id])
+  workerId            String
+  site                Site                @relation(fields: [siteId], references: [id])
+  siteId              String
+  timestamp           DateTime            @default(now())
+  agreedInstructions  AttendanceRecordOnSafetyInstruction[]
+}
+
+model AttendanceRecordOnSafetyInstruction {
+  id                   String              @id @default(uuid())
+  attendanceRecord     AttendanceRecord    @relation(fields: [attendanceRecordId], references: [id])
+  attendanceRecordId   String
+  safetyInstruction    SafetyInstruction   @relation(fields: [safetyInstructionId], references: [id])
+  safetyInstructionId  String
+}
